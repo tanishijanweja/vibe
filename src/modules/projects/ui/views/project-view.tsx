@@ -9,9 +9,9 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 
-import { MessagesContainer } from "../components/messages-container";
+import { FragmentWeb } from "../components/fragment-web";
 import { ProjectHeader } from "../components/project-header";
-
+import { MessagesContainer } from "../components/messages-container";
 interface Props {
   projectId: string;
 }
@@ -40,7 +40,7 @@ export const ProjectView = ({ projectId }: Props) => {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={65} minSize={50}>
-          TODO: Preview
+          {!!activeFragment && <FragmentWeb data={activeFragment} />}
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
