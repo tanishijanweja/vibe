@@ -20,5 +20,4 @@ export function lastAssistantTextMessageContent(result: AgentResult) {
       ? messaqe.content
       : messaqe.content.map((c) => c.text).join("")
     : undefined;
-  1;
 }
