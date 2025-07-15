@@ -11,12 +11,12 @@ import {
 import { Sandbox } from "@e2b/code-interpreter";
 
 import { inngest } from "./client";
-import { stepsSchemas } from "inngest/api/schema";
 import { getSandbox, lastAssistantTextMessageContent } from "./utils";
 import z from "zod";
 import { FRAGMENT_TITLE_PROMPT, PROMPT, RESPONSE_PROMPT } from "@/prompt";
 import { prisma } from "@/lib/db";
 import { parseAgentOutput } from "@/lib/utils";
+import { SANDOX_TIMEOUT } from "./types";
 
 interface AgentState {
   summary: string;
@@ -29,6 +29,7 @@ export const codeAgentFuntion = inngest.createFunction(
   async ({ event, step }) => {
     const sandboxId = await step.run("get-sandbox-id", async () => {
       const sandbox = await Sandbox.create("vibe-nextjs-tanishijanweja-2");
+      await sandbox.setTimeout(SANDOX_TIMEOUT);
       return sandbox.sandboxId;
     });
 
@@ -42,8 +43,9 @@ export const codeAgentFuntion = inngest.createFunction(
             projectId: event.data.projectId,
           },
           orderBy: {
-            createdAt: "desc", //TODO: Change to "asc" if AI does not understant what is the latest message
+            createdAt: "desc",
           },
+          take: 5,
         });
 
         for (const message of messages) {
@@ -54,7 +56,7 @@ export const codeAgentFuntion = inngest.createFunction(
           });
         }
 
-        return formattedMessages;
+        return formattedMessages.reverse();
       }
     );
 
