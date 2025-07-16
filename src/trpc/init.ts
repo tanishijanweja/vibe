@@ -23,7 +23,7 @@ const isAuthed = t.middleware(({ next, ctx }) => {
   if (!ctx.auth?.userId) {
     throw new TRPCError({
       code: "UNAUTHORIZED",
-      message: "Not authenticated, please sign up",
+      message: "Not authenticated, please sign up!",
     });
   }
 
