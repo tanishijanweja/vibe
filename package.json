@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
+    "dev:inngest": "npx inngest-cli@latest dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6.24.0",
-    "@clerk/themes": "^2.2.55",
+    "@clerk/nextjs": "^6.39.0",
+    "@clerk/themes": "^2.4.57",
     "@e2b/code-interpreter": "^1.5.1",
     "@geist-ui/react": "^2.2.5",
     "@google/genai": "^1.34.0",
@@ -75,7 +76,7 @@
     "superjson": "^2.2.2",
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",
-    "zod": "^3.25.67"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -73,7 +73,7 @@ export const codeAgentFuntion = inngest.createFunction(
       name: "code-agent",
       description: "An expert coding agent",
       system: PROMPT,
-      model: gemini({ model: "gemini-2.0-flash" }),
+      model: gemini({ model: "gemini-2.5-flash" }),
       tools: [
         createTool({
           name: "terminal",
@@ -197,14 +197,32 @@ export const codeAgentFuntion = inngest.createFunction(
         return codeAgent;
       },
     });
-    const result = await network.run(event.data.value, { state });
+    
+    let result;
+    try {
+      result = await network.run(event.data.value, { state });
+    } catch (error) {
+      console.error("Network execution error:", error);
+      // Return early with error message
+      await step.run("save-error", async () => {
+        return await prisma.message.create({
+          data: {
+            projectId: event.data.projectId,
+            content: "An error occurred while processing your request. Please try again.",
+            role: "ASSISTANT",
+            type: "ERROR",
+          },
+        });
+      });
+      throw error;
+    }
 
     const fragmentTitileGenerator = createAgent({
       name: "fragment-title-generator",
       description: "A fragment title generator",
       system: FRAGMENT_TITLE_PROMPT,
       model: gemini({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
       }),
     });
 
@@ -213,16 +231,26 @@ export const codeAgentFuntion = inngest.createFunction(
       description: "A response generator",
       system: RESPONSE_PROMPT,
       model: gemini({
-        model: "gemini-2.0-flash",
+        model: "gemini-2.5-flash",
       }),
     });
 
-    const { output: fragmentTitleOutput } = await fragmentTitileGenerator.run(
-      result.state.data.summary
-    );
-    const { output: responseOutput } = await responseGenerator.run(
-      result.state.data.summary
-    );
+    let fragmentTitleOutput: Message[], responseOutput: Message[];
+    try {
+      const fragmentResult = await fragmentTitileGenerator.run(
+        result.state.data.summary
+      );
+      fragmentTitleOutput = fragmentResult.output;
+      
+      const responseResult = await responseGenerator.run(
+        result.state.data.summary
+      );
+      responseOutput = responseResult.output;
+    } catch (error) {
+      console.error("Agent generation error:", error);
+      fragmentTitleOutput = [{ type: "text", role: "assistant", content: "Untitled Fragment" }];
+      responseOutput = [{ type: "text", role: "assistant", content: "Generated content based on your request." }];
+    }
 
     const isError =
       !result.state.data.summary ||
